@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where the Points Go</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+  /* Layout: one reading column (~66ch) like a journal page; tables and the figure sit in the same column and scroll sideways on phones. */
+  :root {
+    --bg: #f6f7f9;
+    --paper: #ffffff;
+    --ink: #1a1e24;
+    --muted: #5a616d;
+    --rule: #dbe0e6;
+    --accent: #0b5cad;
+    --series-b: #c2410c;
+    --series-c: #8a929e;
+    --tint: #eef2f7;
+    --note: #fff7e0;
+    --note-ink: #6b4e00;
+    --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1216; --paper: #161a20; --ink: #e4e7eb; --muted: #9aa3ae; --rule: #2a3039;
+      --accent: #6cb3ff; --series-b: #f59e5b; --series-c: #7d8691; --tint: #1c222a;
+      --note: #2a2414; --note-ink: #f1d58a; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1216; --paper: #161a20; --ink: #e4e7eb; --muted: #9aa3ae; --rule: #2a3039;
+    --accent: #6cb3ff; --series-b: #f59e5b; --series-c: #7d8691; --tint: #1c222a;
+    --note: #2a2414; --note-ink: #f1d58a; color-scheme: dark;
+  }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--serif); font-size: 17px; line-height: 1.62;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 32px 64px;
+  }
+  .page {
+    max-width: 780px; margin: 0 auto; background: var(--paper);
+    border: 1px solid var(--rule); border-radius: 4px;
+    padding: clamp(20px, 5vw, 56px);
+  }
+  .page > * { min-width: 0; }
+  header { display: grid; gap: 10px; margin-bottom: 8px; }
+  .kicker { font-family: var(--sans); font-size: 12.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-family: var(--sans); font-weight: 600; font-size: clamp(30px, 5vw, 40px); line-height: 1.15; margin: 0; text-wrap: balance; }
+  .subtitle { font-size: 20px; color: var(--muted); margin: 0; text-wrap: balance; }
+  .authors { font-family: var(--sans); font-size: 15px; margin: 6px 0 0; }
+  .authors span { color: var(--muted); }
+  .palette { display: flex; gap: 4px; margin: 14px 0 4px; flex-wrap: wrap; }
+  .palette i { width: 18px; height: 18px; border: 1px solid var(--rule); display: block; }
+  .draft {
+    font-family: var(--sans); font-size: 14px; line-height: 1.5;
+    background: var(--note); color: var(--note-ink); border-radius: 4px;
+    padding: 10px 14px; margin: 18px 0 8px;
+  }
+  .abstract { background: var(--tint); border-radius: 4px; padding: 16px 20px; margin: 22px 0 8px; }
+  .abstract h2 { margin-top: 0; }
+  h2 { font-family: var(--sans); font-weight: 600; font-size: 21px; margin: 38px 0 10px; text-wrap: balance; }
+  h2 .n { color: var(--accent); margin-right: .45em; font-variant-numeric: tabular-nums; }
+  h3 { font-family: var(--sans); font-weight: 600; font-size: 17px; margin: 26px 0 6px; }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 1.3em; }
+  li { margin-bottom: 6px; }
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  code, .mono { font-family: var(--mono); font-size: .86em; }
+  .table-wrap { overflow-x: auto; margin: 10px 0 18px; }
+  table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: 14.5px; line-height: 1.45; }
+  caption { caption-side: top; text-align: left; font-size: 13.5px; color: var(--muted); padding-bottom: 6px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font-weight: 600; border-bottom: 1.5px solid var(--ink); white-space: nowrap; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr.hl td { background: var(--tint); }
+  figure { margin: 14px 0 20px; }
+  figcaption { font-family: var(--sans); font-size: 13.5px; color: var(--muted); margin-top: 6px; }
+  .chart { overflow-x: auto; }
+  .chart svg { display: block; width: 100%; min-width: 520px; height: auto; }
+  .axis { stroke: var(--rule); stroke-width: 1; }
+  .tick { fill: var(--muted); font-family: var(--sans); font-size: 12px; }
+  .s-a { stroke: var(--accent); fill: none; stroke-width: 2.4; }
+  .s-b { stroke: var(--series-b); fill: none; stroke-width: 2; }
+  .s-c { stroke: var(--series-c); fill: none; stroke-width: 2; stroke-dasharray: 5 4; }
+  .d-a { fill: var(--accent); } .d-b { fill: var(--series-b); } .d-c { fill: var(--series-c); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--sans); font-size: 13.5px; margin-top: 4px; }
+  .legend span::before { content: ""; display: inline-block; width: 18px; height: 3px; margin-right: 6px; vertical-align: middle; }
+  .legend .la::before { background: var(--accent); }
+  .legend .lb::before { background: var(--series-b); }
+  .legend .lc::before { background: var(--series-c); }
+  .refs li { font-size: 15px; }
+  .muted { color: var(--muted); }
+  @media (max-width: 480px) { body { font-size: 16px; } .subtitle { font-size: 18px; } }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<article class="page">
+  <header>
+    <div class="kicker">Technical report · ARC Prize 2026 · ARC-AGI-3</div>
+    <h1>Where the Points Go</h1>
+    <p class="subtitle">A measurement study of an open-model agent on ARC-AGI-3</p>
+    <p class="authors">Lavin <span>— Koris Lab · November 2026</span></p>
+    <div class="palette" aria-hidden="true">
+      <i style="background:#000000"></i><i style="background:#0074D9"></i><i style="background:#FF4136"></i><i style="background:#2ECC40"></i><i style="background:#FFDC00"></i><i style="background:#AAAAAA"></i><i style="background:#F012BE"></i><i style="background:#FF851B"></i><i style="background:#7FDBFF"></i><i style="background:#870C25"></i>
+    </div>
+  </header>
+
+
+  <section class="abstract" aria-labelledby="abs">
+    <h2 id="abs">Abstract</h2>
+    <p>We report what limits an open-weight language-model agent on ARC-AGI-3 when it must play 110 unseen games in nine hours on one RTX Pro 6000. The agent builds on the public Duck harness (Tufa Labs), Daniel Franzen's Milestone-2 patch and lordhansolo's vLLM runtime for Qwen3.8-Flash-Next, a mixture-of-experts model with about 6B active parameters. Over 23 scored leaderboard submissions and six controlled two-hour runs on the 25 public games, we measured where score is lost.</p>
+    <p>Five findings stand out. <strong>(1)</strong> The score is token-bound: because later levels weigh more, about 10% more effective thinking per game is worth about 2.4 points on the hidden games. <strong>(2)</strong> Reading prompts costs about 15% of generation throughput, and on this hybrid model the serving cache never reaches the agent's previous reply, so every reply is read again on the next turn. <strong>(3)</strong> Tests on the public games are not valid for changes to what the agent reads: an adviser component that looked neutral in a leakage-controlled public test scored about 4 points lower on the hidden games in both of its submissions. <strong>(4)</strong> Levels the agent gets stuck on are mostly a lottery of its first reading: the same model cleared 26 of 41 such levels in other runs, while search could not rescue them even when given the goal. <strong>(5)</strong> Two mechanical changes to the token economy, an effort ladder after truncated replies and lighter history trims, raised levels cleared per token by 4 to 26% in a controlled run. We release the agent and our measurement scripts.</p>
+  </section>
+
+  <h2><span class="n">1</span>Introduction</h2>
+  <p>ARC-AGI-3 replaces static puzzles with interactive games. The agent sees a 64×64 grid in 16 colours, has a handful of actions, and has to find out from experience what each level asks for. Each level scores (h/a)² against the action count h of the median first-time human, capped at 115%; later levels weigh more, and a game's score cannot exceed the weighted share of the levels cleared (<a href="https://docs.arcprize.org/methodology">ARC Prize methodology</a>).</p>
+  <p>The Kaggle competition adds hard limits: no internet, open models only, one 96 GB GPU and nine hours for 110 games, of which 55 are scored on the public leaderboard and 55 decide the final ranking. Within these limits most competitive entries we know of run the same open model family inside the Duck harness, yet public scores range from about 25 to above 70 (<a href="https://arc.markbarney.net/arc-leaderboards">leaderboard snapshot, 25 October</a>).</p>
+  <p>We did not find an architecture that closes that gap. This paper is a careful account of where an agent in this family loses its points, with numbers other teams can check against their own logs. Some losses are mechanical and cheap to remove. Others are traps that cost us leaderboard submissions to find, and we report them so others need not.</p>
+
+  <h2><span class="n">2</span>Related work</h2>
+  <p><strong>Harnesses.</strong> Tufa Labs' Duck harness exposes the game as Python variables in a REPL, shows the board as an image, an ASCII grid and segmentations, and evicts old messages so play can continue indefinitely; it won Milestone 1 (<a href="https://x.com/tufalabs/status/2072336849465417747">Tufa Labs</a>). Franzen's Milestone-2 notebook adds agent tools, a slot scheduler and faster serving on Qwen3.8-Flash-Next (<a href="https://www.kaggle.com/code/dfranzen/arc-agi-3-milestone-2-solution">Franzen</a>).</p>
+  <p><strong>World-model agents.</strong> A coding agent that keeps an executable model of the game, verifies it against recorded transitions and plans with it reaches 41 to 58% RHAE on the public games with GPT-5.4 and GPT-5.5 (<a href="https://arxiv.org/abs/2605.05138">Rodionov, 2026</a>); a follow-up ablation finds that model capability and reasoning effort matter more than the design variants (<a href="https://arxiv.org/abs/2607.15439">Rodionov, 2026b</a>). Tycho (<a href="https://arxiv.org/abs/2607.28287">Lehmann et al., 2026</a>) and OPINE-World (<a href="https://arxiv.org/abs/2607.01531">Courtis et al., 2026</a>) report 78 to 100 on the public games with frontier models. None of these was evaluated on held-out games, and none can run offline on an open model.</p>
+  <p><strong>Exploration.</strong> Training-free graph exploration solved 30 of 52 levels of the six-game preview (<a href="https://arxiv.org/abs/2512.24156">Rudakov et al., 2025</a>). The preview winner, a convolutional action model, fell to near zero on the full benchmark once efficiency was scored (<a href="https://arcprize.org/competitions/arc-agi-3-preview-agents">ARC Prize</a>). Liew shows that the public games can be cleared by trivial strategies and argues that only held-out games test exploration (<a href="https://arxiv.org/abs/2605.25931">Liew, 2026</a>).</p>
+  <p><strong>Serving.</strong> Speculative decoding pays less as batches grow and decoding becomes compute-bound (<a href="https://arxiv.org/abs/2511.20340">Scaling LLM speculative decoding, 2025</a>). Prefix caching for hybrid attention models stores recurrent state only at block boundaries inside prompts; newer vLLM modes also store it while decoding (<a href="https://github.com/vllm-project/vllm/pull/36649">vLLM #36649</a>, <a href="https://github.com/vllm-project/vllm/pull/50172">#50172</a>).</p>
+
+  <h2><span class="n">3</span>The agent</h2>
+  <p>Each turn the agent receives the board as an image and as an ASCII grid, an image of the cells that changed, the harness's summary of the last step and its own retained Python functions. It thinks in Qwen3.8's thinking mode (maximum effort, temperature 0.7) and calls a Python tool that can execute one or more game actions. History is kept up to 104K tokens; when it fills, old messages are dropped with hysteresis, so that trims are rare and large.</p>
+  <p>Up to 18 games hold a decoding slot at a time. A priority gate (affectify's D′) gives a freed slot to the waiting game with the highest expected value, and slots change hands at history trims, the one moment when the cached prefix is lost anyway. Four add-ons run on top of the harness: a memory of the agent's own rule for each cleared level, measured facts about progress after 40K tokens on a level, a second opinion from a fresh model instance on a stalled level, and a pool of rules learned on other games of the same run.</p>
+  <p>Serving uses lordhansolo's vLLM 0.29 build with a mixed NVFP4/FP8 checkpoint of Qwen3.8-Flash-Next (about 125B parameters in total, about 6B active per token), 448 of 512 experts kept by REAP pruning, and three draft tokens from the model's multi-token-prediction head. At 18 concurrent requests it generates about 1,000 tokens per second.</p>
+
+  <h2><span class="n">4</span>Methods</h2>
+  <ul>
+    <li><strong>Leaderboard noise.</strong> We count one submission as one draw. Identical code scored 32.76 and 24.03 (v36) and 32.03 and 26.96 (v48); across 23 submissions the per-run standard deviation is about 2.7 points, so single submissions cannot separate versions closer than about 5 points.</li>
+    <li><strong>Public-set runs.</strong> Two-hour runs of all 25 public games (121 minutes, the competition's GPU time per game) and 30-minute health checks.</li>
+    <li><strong>Same-game token matching.</strong> For every game we take the cumulative generated tokens at each level clear. At budget B we count levels cleared within B tokens on the games the reference run used at least B tokens on; a game a run finished counts with all its levels, and a game a run stopped on before B is left out. This removes differences in machine speed and scheduling.</li>
+    <li><strong>Leakage control.</strong> Our advisers saw a design catalogue that described every public game. In a clean test the catalogue line for the game being played is removed from every adviser request (228 of 228 requests in our clean run).</li>
+    <li><strong>Serving logs.</strong> vLLM's 10-second statistics (prompt and generation throughput, running requests, per-position draft acceptance) and per-request token usage (prompt, cached, completion).</li>
+  </ul>
+
+  <h2><span class="n">5</span>Findings</h2>
+
+  <h3>5.1 The score is token-bound</h3>
+  <p>When a level is cleared at or below the human action count, which holds for most of our cleared levels (median 0.56 to 0.74 times the human count), clearing the first K levels of a seven-level game scores K(K+1)/2 out of 28. Our leaderboard level of about 29 corresponds to about 3.5 levels per hidden game; 37 needs about 4.1.</p>
+  <p>On the public set, raising the budget per game from 150K to 200K tokens (+33%) added 15% more levels, and from 200K to the full budget of about 260K (+30%) another 14%: an elasticity of about 0.45. Through the quadratic weights, 10% more effective tokens is worth about 9% more score, or about 2.4 points at our level. A change that saves 10% of tokens is therefore worth as much as a new idea that raises per-level success by several points.</p>
+
+  <h3>5.2 A hidden serving tax</h3>
+  <p>Across about 1,000 ten-second windows of two full runs, generation throughput falls linearly with prompt throughput (r = −0.80): about 1,125 tokens per second when little is being read, against about 970 on average. Reading prompts costs about 15% of generation.</p>
+  <div class="table-wrap">
+    <table>
+      <caption>Table 1. Where prompt reading comes from (uncached prompt tokens of player requests, two-hour runs v47 and v49). The split of the first two rows comes from the per-request fit described below.</caption>
+      <thead><tr><th>Source</th><th class="num">Share of reading</th><th class="num">Generation cost</th></tr></thead>
+      <tbody>
+        <tr><td>New content each turn (about 1,500 tokens per request)</td><td class="num">≈23%</td><td class="num">≈3.5%</td></tr>
+        <tr><td>The previous reply, read again (about 1.07 times its length)</td><td class="num">≈35%</td><td class="num">≈5.4%</td></tr>
+        <tr><td>History trims (about 160 per run, median about 49K tokens each)</td><td class="num">42%</td><td class="num">≈6.5%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The middle row is the surprise. In 97% of requests the cache stops 128 to 2,048 tokens before the end of the previous prompt (median 188) and never reaches into the reply. The uncached part of a request is about 1,500 tokens plus 1.07 to 1.10 times the length of the previous reply. The model's recurrent (GDN) state is saved only at block boundaries inside prompts, so the tokens the agent generated on its last turn can never be reused. A cache mode that saves state while decoding should remove most of this cost; we could not test it in our runtime before the deadline.</p>
+  <p>Decoding is also compute-bound at our batch size: per-request speed falls from 90 tokens per second with 10 requests running to 63 with 18. The three draft tokens are accepted at rates of 0.755, 0.550 and 0.393 (median of 2,327 windows). A step-time model fitted to these numbers predicts that two draft tokens would be about 6% faster than three. Speculative decoding is exact, so this change could not alter the agent's behaviour. We report it as a prediction, not a result.</p>
+
+  <h3>5.3 Public tests mislead for changes to what the agent reads</h3>
+  <p>We added "first impressions": at the first turn of every level, two fresh instances of the model look at the new board, the controls and the rules of earlier levels and propose up to three goal hypotheses with the cheapest test for each. On public games whose descriptions the advisers had not seen, they named the right goal in every level we graded by hand, and the player cited them in about 21% of the turns that received them.</p>
+  <div class="table-wrap">
+    <table>
+      <caption>Table 2. The same component under three evaluations.</caption>
+      <thead><tr><th>Evaluation</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>30-minute public test, catalogue not hidden</td><td>about 20% more levels per token than earlier runs at 80K tokens</td></tr>
+        <tr><td>Two-hour public test, catalogue hidden (same 25 games, token-matched)</td><td>10 to 17% fewer levels at 40K to 80K tokens; equal at 120K to 200K</td></tr>
+        <tr><td>Hidden games (leaderboard)</td><td>24.0 and 24.21, against a mean of 28.54 over our other 21 submissions</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>If the component were neutral, two scores this low would occur by chance about 0.3% of the time. An earlier component that pointed out matching shapes on each level's first board scored 47 against 55 to 57 in public tests and was never submitted. Our reading: components that the agent trusts shape its first hypothesis, and on unseen games a plausible but wrong hypothesis costs more than it saves. Public games, which our components and their authors have seen, cannot reveal this. Any change to what the agent reads needs a held-out game set; leaderboard runs, at about ±2.7 points each and one per day, are too slow to serve as one.</p>
+
+  <h3>5.4 Stuck levels are a lottery, and search cannot fix them</h3>
+  <p>We collected the 41 levels on which a run spent at least 60K tokens without clearing them. The same model cleared 26 of them in another run, often within 9 to 21 moves. In 25 of those 26 cases the stuck run had already used the clearing run's main interaction and seen its effect: it knew the controls and misread the goal.</p>
+  <p>Restarting does not help. A level stalled at 60K tokens was cleared within the next 60K in 62% of cases when the agent continued, against 44% for a fresh start; at 100K the figures were 51% and 35%. Search does not help either: three structured search engines with learned interface masks cleared 3 of 40 stuck levels within 12,000 moves, and only 4 of 25 even when given the true final board as the goal.</p>
+
+  <h3>5.5 A cheaper token economy</h3>
+  <p>Two mechanical changes target findings 5.1 and 5.2. The <em>effort ladder</em> is a built-in harness option, off by default: after a reply is cut off at the 12,288-token cap, the following requests think at "medium" effort until an action changes the board. Our two-hour runs had 33 to 41 such cut-offs each, holding about 7% of all tokens. <em>Lighter trims</em> keep about 35K tokens after a trim instead of half the budget (about 52K), which halves the history read again at each trim and lowers the average history depth by about 12%. A scheduler simulation of the longer slot sessions this causes predicted a cost of 0.06 to 0.20 points, with every game still started.</p>
+  <figure>
+    <div class="chart" role="img" aria-label="Levels cleared per game against tokens per game. v60-test is highest from 40K to 120K tokens.">
+      <svg viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg">
+        <line class="axis" x1="48" y1="280" x2="624" y2="280"/>
+        <line class="axis" x1="48" y1="221.3" x2="624" y2="221.3"/>
+        <line class="axis" x1="48" y1="162.7" x2="624" y2="162.7"/>
+        <line class="axis" x1="48" y1="104" x2="624" y2="104"/>
+        <line class="axis" x1="48" y1="45.3" x2="624" y2="45.3"/>
+        <text class="tick" x="40" y="284" text-anchor="end">0</text>
+        <text class="tick" x="40" y="225.3" text-anchor="end">1</text>
+        <text class="tick" x="40" y="166.7" text-anchor="end">2</text>
+        <text class="tick" x="40" y="108" text-anchor="end">3</text>
+        <text class="tick" x="40" y="49.3" text-anchor="end">4</text>
+        <text class="tick" x="48" y="300" text-anchor="middle">0</text>
+        <text class="tick" x="163.2" y="300" text-anchor="middle">40K</text>
+        <text class="tick" x="278.4" y="300" text-anchor="middle">80K</text>
+        <text class="tick" x="393.6" y="300" text-anchor="middle">120K</text>
+        <text class="tick" x="508.8" y="300" text-anchor="middle">160K</text>
+        <text class="tick" x="616" y="300" text-anchor="end">200K</text>
+        <text class="tick" x="336" y="317" text-anchor="middle">tokens per game</text>
+        <polyline class="s-c" points="105.6,240.1 163.2,197.9 220.8,172.6 278.4,141.5 393.6,99.3 508.8,65.9 624,34.2"/>
+        <polyline class="s-b" points="105.6,242.5 163.2,212.0 220.8,188.5 278.4,155.6 393.6,101.7 508.8,61.8 624,35.9"/>
+        <polyline class="s-a" points="105.6,240.1 163.2,200.2 220.8,165.0 278.4,132.2 393.6,94.6 508.8,64.1 624,21.9"/>
+        <g class="d-a"><circle cx="163.2" cy="200.2" r="3.2"/><circle cx="220.8" cy="165.0" r="3.2"/><circle cx="278.4" cy="132.2" r="3.2"/><circle cx="624" cy="21.9" r="3.2"/></g>
+        <g class="d-b"><circle cx="163.2" cy="212.0" r="3"/><circle cx="220.8" cy="188.5" r="3"/><circle cx="278.4" cy="155.6" r="3"/><circle cx="624" cy="35.9" r="3"/></g>
+      </svg>
+    </div>
+    <div class="legend"><span class="la">v60-test (both changes)</span><span class="lb">v59C (same advisers, no changes)</span><span class="lc">v45–v47 average (no advisers)</span></div>
+    <figcaption>Figure 1. Levels cleared per game within a token budget, same 25 public games, two-hour runs. Both v60-test and v59C ran with the advisers and the catalogue hidden; v60-test also ran without the per-turn change image.</figcaption>
+  </figure>
+  <p>Against v59C, which used the same advisers in the same clean setting, v60-test cleared 17%, 26% and 19% more levels at 40K, 60K and 80K tokens, about the same at 120K and 160K, and 6% more at 200K. It reached 59.39 with 131 levels, our best two-hour run. The effort ladder fired 120 times, cut-off replies fell from 50 to 38, and the agent took 10% more actions per thousand tokens. Total throughput did not rise: that machine was about 3% slower, and more, shorter turns increased prompt reading. The gain came as more levels per token, not as more tokens. This was one run with three simultaneous changes, so we cannot attribute the gain to each of them.</p>
+
+  <h2><span class="n">6</span>Results</h2>
+  <div class="table-wrap">
+    <table>
+      <caption>Table 3. Leaderboard (55 hidden games) and two-hour public-set scores of the versions discussed.</caption>
+      <thead><tr><th>Version</th><th>What changed</th><th class="num">Leaderboard</th><th class="num">Public, 2 h</th></tr></thead>
+      <tbody>
+        <tr><td>v36</td><td>Franzen base, vLLM serving, add-ons</td><td class="num">32.76, 24.03</td><td class="num">—</td></tr>
+        <tr><td>v45–v47</td><td>pruned model, more slots, cross-game rules</td><td class="num">26.68, 29.34, —</td><td class="num">55.2–56.8</td></tr>
+        <tr><td>v48</td><td>v47 with a later search trigger</td><td class="num">32.03, 26.96</td><td class="num">—</td></tr>
+        <tr><td>v49</td><td>shape-relation hints (not submitted)</td><td class="num">—</td><td class="num">47.32</td></tr>
+        <tr><td>v55, v59b</td><td>first impressions</td><td class="num">24.0, 24.21</td><td class="num">55.71 (clean)</td></tr>
+        <tr class="hl"><td>v60</td><td>v48's player, effort ladder, lighter trims</td><td class="num">33.39</td><td class="num">59.39*</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="muted">* Measured as v60-test, which also had the advisers on and no change image. The submitted v60 has neither, following finding 5.3.</p>
+  <p>v60's first submission scored 33.39, our best leaderboard result, about 3.5 points above the average of our earlier submissions. One submission carries about ±2.7 points of noise, so this is consistent with, but does not yet establish, the gain measured in section 5.5.</p>
+
+  <h2><span class="n">7</span>Limitations</h2>
+  <p>Most comparisons rest on one run per configuration. Token matching removes machine speed and scheduling but not the run-to-run variance of the agent itself. Our two-hour comparisons use the public games, which finding 5.3 shows can mislead; we rely on them only for changes that do not alter what the agent reads. The elasticity behind finding 5.1 is measured on the public games and extrapolated to the hidden ones. The serving findings are specific to a hybrid mixture-of-experts model in one vLLM build.</p>
+
+  <h2><span class="n">8</span>Lessons</h2>
+  <ol>
+    <li><strong>Count tokens before ideas.</strong> At the frontier of this benchmark the score is quadratic in levels and levels are concave in tokens, so cheap throughput gains compete with expensive reasoning gains.</li>
+    <li><strong>Audit the serving stack.</strong> Measure prompt reading against generation, check whether the cache reaches the previous reply, and choose the draft length for the batch size you actually run.</li>
+    <li><strong>Build a held-out set before changing what the agent reads.</strong> Public games and their descriptions leak into components and into their authors' judgement; the leaderboard is too noisy to replace a held-out set.</li>
+    <li><strong>Invest in first readings, not in rescue.</strong> Stuck levels are mostly lost to an early wrong reading; restarts and search both did worse than continuing.</li>
+  </ol>
+
+  <h2><span class="n">9</span>Code and data</h2>
+  <p>The submitted Kaggle notebook (v60) will be public under an open-source licence after 2 November 2026: <span class="mono">[link pending]</span>. The measurement scripts used here (token matching from <span class="mono">benchmark.json</span>, serving-log fits, cache-boundary analysis, stuck-level replays and the scheduler simulation) will be released with it.</p>
+
+  <h2><span class="n">10</span>Acknowledgements</h2>
+  <p>We build directly on Tufa Labs' Duck harness, Daniel Franzen's Milestone-2 solution, lordhansolo's vLLM runtime and checkpoint, and affectify's D′ scheduler. We thank the ARC Prize team for the benchmark. This report was prepared with the help of an AI assistant (Claude); every number in it comes from our own runs and logs.</p>
+
+  <h2>References</h2>
+  <ol class="refs">
+    <li>ARC Prize Foundation. ARC-AGI-3 methodology. <a href="https://docs.arcprize.org/methodology">docs.arcprize.org/methodology</a></li>
+    <li>Tufa Labs. The Duck harness (Milestone 1). <a href="https://x.com/tufalabs/status/2072336849465417747">x.com/tufalabs</a></li>
+    <li>D. Franzen. ARC-AGI-3 Milestone 2 solution. <a href="https://www.kaggle.com/code/dfranzen/arc-agi-3-milestone-2-solution">kaggle.com/code/dfranzen</a></li>
+    <li>S. Rodionov. Executable World Models for ARC-AGI-3 in the Era of Coding Agents. <a href="https://arxiv.org/abs/2605.05138">arXiv:2605.05138</a></li>
+    <li>S. Rodionov. Do Coding Agents Need Executable World Models, Simplification, and Verification to Solve ARC-AGI-3? <a href="https://arxiv.org/abs/2607.15439">arXiv:2607.15439</a></li>
+    <li>Lehmann, Aioanei, Vahdati. Tycho: Active Abstraction with Programmatic World Models for ARC-AGI-3. <a href="https://arxiv.org/abs/2607.28287">arXiv:2607.28287</a></li>
+    <li>Courtis, Li, Sanner. OPINE-World. <a href="https://arxiv.org/abs/2607.01531">arXiv:2607.01531</a></li>
+    <li>Liew K. H. Explore Before You Solve: The Speed–Depth Trade-off in Epistemic Agents for ARC-AGI-3. <a href="https://arxiv.org/abs/2605.25931">arXiv:2605.25931</a></li>
+    <li>Rudakov, Shock, Cowley. Graph-based exploration for ARC-AGI-3 interactive reasoning tasks. <a href="https://arxiv.org/abs/2512.24156">arXiv:2512.24156</a></li>
+    <li>ARC Prize. ARC-AGI-3 Preview Agent Competition. <a href="https://arcprize.org/competitions/arc-agi-3-preview-agents">arcprize.org</a></li>
+    <li>Scaling LLM speculative decoding. <a href="https://arxiv.org/abs/2511.20340">arXiv:2511.20340</a></li>
+    <li>vLLM project. Prefix caching for hybrid GDN models. <a href="https://github.com/vllm-project/vllm/pull/36649">PR #36649</a>, <a href="https://github.com/vllm-project/vllm/pull/50172">PR #50172</a></li>
+  </ol>
+</article>
+</html>
